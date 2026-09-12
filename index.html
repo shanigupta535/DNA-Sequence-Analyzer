@@ -13,29 +13,25 @@
    ============================================================ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  /* Pure black foundation */
   --bg:#000000;
   --bg-soft:#050507;
   --surface:rgba(255,255,255,.025);
   --surface-2:rgba(255,255,255,.04);
   --surface-3:rgba(255,255,255,.06);
 
-  /* Borders */
   --border:rgba(255,255,255,.07);
   --border-strong:rgba(255,255,255,.12);
   --border-accent:rgba(99,102,241,.35);
 
-  /* Text */
   --text:#f5f7fb;
   --text-2:#c3c9d9;
   --muted:#6b7385;
   --muted-2:#8b93a7;
 
-  /* Brand gradient family — indigo → cyan (cohesive) */
-  --g1:#6366f1;   /* indigo */
-  --g2:#7c3aed;   /* violet */
-  --g3:#06b6d4;   /* cyan */
-  --g4:#10b981;   /* emerald */
+  --g1:#6366f1;
+  --g2:#7c3aed;
+  --g3:#06b6d4;
+  --g4:#10b981;
 
   --grad-primary:linear-gradient(135deg,#6366f1 0%,#7c3aed 50%,#06b6d4 100%);
   --grad-soft:linear-gradient(135deg,rgba(99,102,241,.15),rgba(6,182,212,.08));
@@ -43,6 +39,8 @@
 
   --mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
   --sans:'Inter',ui-sans-serif,system-ui,-apple-system,sans-serif;
+
+  --topbar-h:70px;
 }
 
 html{scroll-behavior:smooth}
@@ -56,8 +54,8 @@ body{
   text-rendering:optimizeLegibility;
   line-height:1.5;
 }
+body.no-scroll{overflow:hidden}
 
-/* Scrollbar */
 ::-webkit-scrollbar{width:10px;height:10px}
 ::-webkit-scrollbar-track{background:#0a0a0c}
 ::-webkit-scrollbar-thumb{background:rgba(99,102,241,.3);border-radius:99px;border:2px solid transparent;background-clip:content-box}
@@ -94,14 +92,15 @@ body{
    ============================================================ */
 .topbar{
   position:sticky;top:0;z-index:100;
-  display:flex;align-items:center;justify-content:space-between;gap:20px;
-  padding:14px 32px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:0 32px;
+  height:var(--topbar-h);
   background:rgba(0,0,0,.72);
   backdrop-filter:blur(24px) saturate(180%);
   -webkit-backdrop-filter:blur(24px) saturate(180%);
   border-bottom:1px solid var(--border);
 }
-.brand{display:flex;align-items:center;gap:13px}
+.brand{display:flex;align-items:center;gap:13px;min-width:0}
 .logo{
   width:42px;height:42px;border-radius:11px;display:grid;place-items:center;
   background:var(--grad-primary);
@@ -124,6 +123,7 @@ body{
 }
 .topbar-nav a:hover{color:var(--text);background:var(--surface-2)}
 
+.topbar-right{display:flex;align-items:center;gap:12px}
 .top-badge{
   display:inline-flex;align-items:center;gap:7px;
   padding:7px 13px;border-radius:99px;font-size:11.5px;font-weight:600;
@@ -135,6 +135,105 @@ body{
   box-shadow:0 0 8px rgba(16,185,129,.9);animation:blip 2s infinite;
 }
 @keyframes blip{50%{opacity:.35}}
+
+/* Hamburger button */
+.hamburger{
+  display:none;
+  width:42px;height:42px;border-radius:11px;
+  background:var(--surface-2);
+  border:1px solid var(--border-strong);
+  cursor:pointer;
+  align-items:center;justify-content:center;
+  flex-direction:column;gap:5px;
+  padding:0;flex-shrink:0;
+  transition:.2s;
+}
+.hamburger:hover{background:var(--surface-3);border-color:rgba(255,255,255,.2)}
+.hamburger span{
+  display:block;width:18px;height:2px;border-radius:2px;
+  background:#e2e8f0;
+  transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s,width .3s;
+  transform-origin:center;
+}
+.hamburger.active span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.active span:nth-child(2){opacity:0;width:0}
+.hamburger.active span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* Mobile drawer */
+.drawer-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.65);
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  opacity:0;pointer-events:none;z-index:90;
+  transition:opacity .28s;
+}
+.drawer-backdrop.open{opacity:1;pointer-events:auto}
+
+.drawer{
+  position:fixed;top:0;right:0;bottom:0;z-index:95;
+  width:min(340px,88vw);
+  background:linear-gradient(180deg,#06060a,#000);
+  border-left:1px solid var(--border-strong);
+  transform:translateX(100%);
+  transition:transform .34s cubic-bezier(.2,.8,.2,1);
+  display:flex;flex-direction:column;
+  overflow-y:auto;
+  box-shadow:-30px 0 80px -30px rgba(0,0,0,1);
+}
+.drawer.open{transform:translateX(0)}
+.drawer-head{
+  padding:22px 24px 18px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.drawer-head .title{
+  font-size:11px;font-weight:800;letter-spacing:1.6px;
+  text-transform:uppercase;color:var(--muted);
+}
+.drawer-close{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--surface-2);border:1px solid var(--border);
+  color:var(--text-2);cursor:pointer;font-size:16px;
+  display:grid;place-items:center;font-family:inherit;
+  transition:.2s;
+}
+.drawer-close:hover{background:var(--surface-3);color:#fff}
+
+.drawer-nav{padding:14px 12px;display:flex;flex-direction:column;gap:2px}
+.drawer-nav a{
+  display:flex;align-items:center;gap:14px;
+  padding:13px 14px;border-radius:12px;
+  color:var(--text-2);text-decoration:none;
+  font-size:14.5px;font-weight:600;
+  transition:.2s;
+}
+.drawer-nav a:hover{background:var(--surface-2);color:#fff}
+.drawer-nav a .ico{
+  width:34px;height:34px;border-radius:9px;flex-shrink:0;
+  display:grid;place-items:center;
+  background:var(--surface-2);border:1px solid var(--border);
+  font-size:15px;
+}
+.drawer-nav a.active .ico{
+  background:var(--grad-primary);border-color:transparent;
+  box-shadow:0 8px 18px -8px rgba(99,102,241,.9);
+}
+.drawer-nav a.active{color:#fff}
+
+.drawer-foot{
+  margin-top:auto;padding:20px 24px 26px;
+  border-top:1px solid var(--border);
+  display:flex;flex-direction:column;gap:14px;
+}
+.drawer-foot .btn{width:100%}
+.drawer-foot .badge-row{
+  display:flex;flex-wrap:wrap;gap:8px;
+}
+.drawer-foot .mini-badge{
+  font-size:10.5px;font-weight:700;letter-spacing:.6px;
+  padding:5px 10px;border-radius:99px;
+  background:var(--surface-2);border:1px solid var(--border);
+  color:var(--muted-2);text-transform:uppercase;
+}
 
 /* ============================================================
    LAYOUT
@@ -157,12 +256,14 @@ main{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:0 32px 1
   font-size:12px;font-weight:500;color:var(--text-2);
   margin-bottom:28px;
   animation:fadeUp .7s both;
+  max-width:100%;
 }
 .hero-badge .tag{
   padding:3px 9px;border-radius:99px;font-size:10px;font-weight:800;
   letter-spacing:.5px;
   background:var(--grad-primary);color:#fff;
   text-transform:uppercase;
+  flex-shrink:0;
 }
 .hero h1{
   font-size:clamp(38px,6vw,74px);
@@ -306,6 +407,7 @@ main{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:0 32px 1
 .ws-title{display:flex;align-items:center;gap:11px}
 .ws-title .pulse{
   width:8px;height:8px;border-radius:50%;background:#10b981;position:relative;
+  flex-shrink:0;
 }
 .ws-title .pulse::after{
   content:'';position:absolute;inset:-4px;border-radius:50%;
@@ -375,7 +477,6 @@ main{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:0 32px 1
    ============================================================ */
 #results{margin-top:56px}
 
-/* Stat cards */
 .stats-grid{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
   gap:14px;margin-bottom:32px;
@@ -415,8 +516,9 @@ main{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:0 32px 1
   background:var(--surface);
   border:1px solid var(--border);
   overflow-x:auto;scrollbar-width:none;
-  position:sticky;top:72px;z-index:40;
+  position:sticky;top:var(--topbar-h);z-index:40;
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  -webkit-overflow-scrolling:touch;
 }
 .tabs::-webkit-scrollbar{display:none}
 .tab{
@@ -425,6 +527,7 @@ main{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:0 32px 1
   font-family:inherit;font-size:13px;font-weight:600;
   color:var(--muted-2);white-space:nowrap;
   transition:.2s;
+  flex-shrink:0;
 }
 .tab:hover{color:var(--text);background:var(--surface-2)}
 .tab.active{
@@ -434,11 +537,9 @@ main{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:0 32px 1
   font-weight:700;
 }
 
-/* Panels */
 .panel{display:none}
 .panel.active{display:block;animation:fadeUp .4s cubic-bezier(.2,.8,.2,1)}
 
-/* Cards */
 .card{
   padding:24px;border-radius:18px;margin-bottom:16px;
   background:linear-gradient(180deg,rgba(255,255,255,.028),rgba(255,255,255,.008));
@@ -449,6 +550,7 @@ main{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:0 32px 1
   font-size:14px;font-weight:700;letter-spacing:-.1px;
   margin-bottom:16px;
   display:flex;align-items:center;gap:10px;
+  flex-wrap:wrap;
 }
 .card h3 .dot{
   width:7px;height:7px;border-radius:50%;flex-shrink:0;
@@ -475,7 +577,6 @@ main{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:0 32px 1
 .b-N{color:#94a3b8}
 .dim{color:#4a5166}
 
-/* Mono blocks */
 .mono{
   font-family:var(--mono);font-size:12.5px;line-height:1.9;letter-spacing:.5px;
   background:#000;border:1px solid var(--border);border-radius:12px;
@@ -508,14 +609,16 @@ main{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:0 32px 1
 .table-wrap{
   overflow:auto;border-radius:12px;border:1px solid var(--border);
   max-height:480px;background:#000;
+  -webkit-overflow-scrolling:touch;
 }
-table{width:100%;border-collapse:collapse;font-size:12.8px}
+table{width:100%;border-collapse:collapse;font-size:12.8px;min-width:520px}
 thead th{
   position:sticky;top:0;z-index:2;
   text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:1px;
   color:var(--muted);font-weight:800;padding:12px 14px;
   background:#030305;
   border-bottom:1px solid var(--border-strong);
+  white-space:nowrap;
 }
 tbody td{
   padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.035);
@@ -557,7 +660,6 @@ td.num{text-align:right;color:#a5b4fc;font-weight:700}
   box-shadow:0 0 14px rgba(236,72,153,1);
 }
 
-/* KV grid */
 .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
 .kv-item{
   display:flex;justify-content:space-between;align-items:center;gap:12px;
@@ -566,9 +668,8 @@ td.num{text-align:right;color:#a5b4fc;font-weight:700}
   font-size:12.8px;
 }
 .kv-item span:first-child{color:var(--muted-2);font-weight:500}
-.kv-item span:last-child{font-family:var(--mono);font-weight:700;color:#dbeafe}
+.kv-item span:last-child{font-family:var(--mono);font-weight:700;color:#dbeafe;text-align:right}
 
-/* Motif hits */
 .motif-hit{
   padding:12px 15px;border-radius:11px;margin-bottom:9px;
   background:var(--surface);border:1px solid var(--border);
@@ -584,7 +685,6 @@ td.num{text-align:right;color:#a5b4fc;font-weight:700}
   color:#fff;border-radius:4px;padding:1px 4px;font-weight:800;
 }
 
-/* Toolbar row */
 .row-tools{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;align-items:center}
 .inline-input{
   background:#000;border:1px solid var(--border-strong);
@@ -599,7 +699,6 @@ td.num{text-align:right;color:#a5b4fc;font-weight:700}
 .inline-input::placeholder{color:#3d4356}
 .hint-text{font-size:12.5px;color:var(--muted);font-weight:500}
 
-/* Empty state */
 .empty{
   padding:36px 20px;text-align:center;color:var(--muted);
   font-size:13px;border:1px dashed rgba(255,255,255,.11);
@@ -649,6 +748,7 @@ footer{
 #toast{
   position:fixed;bottom:26px;right:26px;z-index:300;
   display:flex;flex-direction:column;gap:10px;pointer-events:none;
+  max-width:calc(100vw - 32px);
 }
 .toast-msg{
   padding:14px 20px;border-radius:12px;font-size:13px;font-weight:600;
@@ -668,36 +768,157 @@ footer{
 /* ============================================================
    RESPONSIVE
    ============================================================ */
-@media (max-width:900px){
+
+/* Tablet — ≤ 1024 */
+@media (max-width:1024px){
+  main{padding:0 24px 90px}
+  .topbar{padding:0 24px}
   .foot-inner{grid-template-columns:1fr 1fr;gap:32px}
-  .topbar-nav{display:none}
+  .stats-grid{grid-template-columns:repeat(3,1fr)}
 }
-@media (max-width:820px){
-  main{padding:0 16px 80px}
-  .topbar{padding:12px 16px}
-  .brand-text p{display:none}
-  .hero{padding:56px 0 44px}
-  .hero-stats{grid-template-columns:1fr 1fr}
+
+/* Mobile — ≤ 860 */
+@media (max-width:860px){
+  :root{--topbar-h:64px}
+  main{padding:0 18px 80px}
+  .topbar{padding:0 18px}
+
+  /* Hide desktop nav, show hamburger */
+  .topbar-nav{display:none}
+  .hamburger{display:flex}
+  .top-badge{display:none}
+
+  .hero{padding:56px 0 46px}
+  .hero h1{font-size:clamp(30px,8vw,44px)}
+  .hero-sub{font-size:15px;margin-bottom:32px}
+  .hero-actions{margin-bottom:48px}
+  .hero-stats{grid-template-columns:1fr 1fr;border-radius:16px}
+  .hero-stat{padding:22px 14px}
+  .hero-stat .num{font-size:26px}
+
   .workspace{padding:20px;border-radius:18px}
-  .ws-foot{flex-direction:column;align-items:stretch}
+  .ws-head{flex-direction:column;align-items:flex-start;gap:12px}
+  .samples{width:100%}
+  .ws-foot{flex-direction:column;align-items:stretch;gap:14px}
+  .meta-group{justify-content:flex-start}
   .action-group{width:100%}
-  .action-group .btn{flex:1}
+  .action-group .btn{flex:1;min-width:0}
+  .action-group label.btn{flex:1}
+
   .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px}
   .stat{padding:16px}
   .stat .value{font-size:20px}
-  .bar-row{grid-template-columns:32px 1fr 80px;gap:10px}
-  .card{padding:18px}
-  .tabs{top:64px;padding:4px}
-  .tab{padding:8px 13px;font-size:12.5px}
-  .section-head h2{font-size:20px}
-  footer{padding:36px 16px 30px}
-  .foot-inner{grid-template-columns:1fr;gap:26px}
+  .stat .label{font-size:10px}
+  .stat .sub{font-size:11px}
+
+  .section-head h2{font-size:22px}
+  .section-head p{font-size:13px}
+
+  .tabs{padding:4px;border-radius:12px;margin-bottom:16px}
+  .tab{padding:9px 14px;font-size:12.5px;border-radius:8px}
+
+  .card{padding:18px;border-radius:16px}
+  .card h3{font-size:13.5px}
+  .card h3 .hint{margin-left:0;width:100%;text-align:left}
+
+  .bar-row{grid-template-columns:34px 1fr 90px;gap:10px}
+  .bar-val{font-size:11px}
+
+  .row-tools{gap:8px}
+  .inline-input{min-width:0;width:100%}
+  .row-tools .btn.primary{width:100%;margin-left:0!important}
+
+  .seq-view{font-size:12px;letter-spacing:1px;padding:14px;line-height:1.95}
+  .mono{font-size:12px;padding:14px}
+
+  footer{padding:40px 18px 32px;margin-top:50px}
+  .foot-inner{grid-template-columns:1fr 1fr;gap:28px}
+  .foot-brand{grid-column:1 / -1}
+  .foot-brand p{max-width:100%}
+  .foot-bottom{flex-direction:column;align-items:flex-start;text-align:left;gap:8px;font-size:11.5px}
 }
-@media (max-width:480px){
-  .hero h1{font-size:32px}
-  .hero-actions{flex-direction:column;align-items:stretch}
+
+/* Small phones — ≤ 560 */
+@media (max-width:560px){
+  main{padding:0 14px 70px}
+  .topbar{padding:0 14px}
+  .brand-text h1{font-size:15px}
+  .brand-text p{display:none}
+  .logo{width:38px;height:38px}
+  .logo svg{width:20px;height:20px}
+
+  .hero{padding:44px 0 36px}
+  .hero-badge{font-size:11px;padding:6px 12px 6px 6px;gap:7px}
+  .hero-badge .tag{font-size:9.5px;padding:2px 8px}
+  .hero h1{font-size:30px;letter-spacing:-.03em}
+  .hero-sub{font-size:14px;line-height:1.6}
+  .hero-actions{flex-direction:column;align-items:stretch;gap:10px}
   .hero-actions .btn{width:100%}
-  .hero-stats{grid-template-columns:1fr}
+  .hero-stats{grid-template-columns:1fr 1fr}
+  .hero-stat{padding:18px 10px}
+  .hero-stat .num{font-size:22px}
+  .hero-stat .lbl{font-size:10px}
+
+  .workspace{padding:16px;border-radius:16px}
+  .ws-title h3{font-size:13.5px}
+  .ws-title h3 span{font-size:11.5px}
+  .samples{gap:6px}
+  .samples-label{font-size:10px}
+  .chip{font-size:11px;padding:5px 10px}
+
+  .seq-textarea{font-size:12.5px;padding:14px 16px;min-height:150px}
+
+  .stats-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .stat{padding:14px;border-radius:14px}
+  .stat .value{font-size:17px;letter-spacing:-.5px}
+  .stat .label{font-size:9.5px;letter-spacing:.8px}
+  .stat .sub{font-size:10.5px}
+
+  .section-head h2{font-size:20px}
+  .tab{padding:8px 12px;font-size:12px}
+
+  .card{padding:15px}
+  .card h3{font-size:13px;margin-bottom:13px}
+  .card-desc{font-size:12px}
+
+  .kv{grid-template-columns:1fr}
+  .kv-item{padding:10px 13px;font-size:12.2px}
+
+  .enz-map{height:56px}
+  .enz-tick{height:22px}
+  .enz-tick:hover{height:32px}
+
+  .bar-row{grid-template-columns:30px 1fr 78px;gap:8px}
+  .bar-key{width:30px;height:30px;font-size:12px;border-radius:8px}
+  .bar-track{height:8px}
+  .bar-val{font-size:10.5px}
+
+  .motif-hit{padding:10px 13px;font-size:11.5px}
+
+  .empty{padding:26px 14px;font-size:12.5px}
+
+  #toast{bottom:16px;right:16px;left:16px}
+  .toast-msg{max-width:100%}
+
+  footer{padding:34px 14px 28px}
+  .foot-inner{grid-template-columns:1fr;gap:24px}
+  .foot-col h4{margin-bottom:10px}
+
+  .drawer{width:min(300px,92vw)}
+  .drawer-nav a{font-size:14px;padding:12px}
+  .drawer-head{padding:18px 20px 14px}
+  .drawer-foot{padding:16px 20px 22px}
+}
+
+/* Landscape tall devices — narrow height */
+@media (max-height:520px) and (orientation:landscape){
+  .drawer{width:min(320px,60vw)}
+  .hero{padding:32px 0 26px}
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
 </style>
 </head>
@@ -721,24 +942,51 @@ footer{
       <p>Bioinformatics Suite</p>
     </div>
   </div>
+
   <nav class="topbar-nav">
     <a href="#workspace">Analyzer</a>
     <a href="#results">Results</a>
-
-  <a
-  href="/Helix_Analyzer_How_to_Use.pdf"
-  target="_blank"
-  rel="noopener noreferrer"
->
-  Docs
-</a>
-
+    <a href="#tools">Tools</a>
+    <a href="#">Docs</a>
   </nav>
-  <div style="display:flex;align-items:center;gap:12px">
+
+  <div class="topbar-right">
     <span class="top-badge"><span class="dot"></span> All systems live</span>
     <button class="btn ghost mini" id="downloadBtn" disabled style="display:none" title="Download report">⬇ Report</button>
+    <button class="hamburger" id="hamburgerBtn" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </header>
+
+<!-- ================= MOBILE DRAWER ================= -->
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-head">
+    <span class="title">Navigation</span>
+    <button class="drawer-close" id="drawerClose" aria-label="Close menu">✕</button>
+  </div>
+  <nav class="drawer-nav" id="drawerNav">
+    <a href="#workspace" data-drawer-link><span class="ico">⚡</span> Analyzer</a>
+    <a href="#results" data-drawer-link><span class="ico">📊</span> Results</a>
+    <a href="#workspace" data-drawer-link><span class="ico">🧬</span> Composition</a>
+    <a href="#workspace" data-drawer-link><span class="ico">🔄</span> Translation</a>
+    <a href="#workspace" data-drawer-link><span class="ico">🔍</span> ORF Finder</a>
+    <a href="#workspace" data-drawer-link><span class="ico">✂️</span> Restriction Map</a>
+    <a href="#workspace" data-drawer-link><span class="ico">🎯</span> Motif Search</a>
+    <a href="#tools" data-drawer-link><span class="ico">🛠</span> Tools</a>
+  </nav>
+  <div class="drawer-foot">
+    <div class="badge-row">
+      <span class="mini-badge">7 Modules</span>
+      <span class="mini-badge">25+ Enzymes</span>
+      <span class="mini-badge">6 Frames</span>
+    </div>
+    <button class="btn ghost" id="drawerDownloadBtn" disabled>
+      ⬇ Download Report
+    </button>
+  </div>
+</aside>
 
 <main>
 
@@ -938,7 +1186,7 @@ footer{
     </div>
 
     <!-- TOOLS -->
-    <div class="panel" data-panel="tools">
+    <div class="panel" data-panel="tools" id="tools">
       <div class="card">
         <h3><span class="dot"></span> Reverse Complement
           <button class="btn ghost mini" style="margin-left:auto" data-copy="rcOut">Copy</button>
@@ -1002,7 +1250,13 @@ footer{
       <h4>Resources</h4>
       <a href="#">IUPAC Codes</a>
       <a href="#">Genetic Code</a>
-      <a href="#">Documentation</a>
+      <a
+href="/Helix_Analyzer_How_to_Use.pdf"
+target="_blank"
+rel="noopener noreferrer"
+>
+Documentation
+</a>
       <a href="#">Cite</a>
     </div>
   </div>
@@ -1094,9 +1348,28 @@ function toast(msg, type = 'info', ms = 3200) {
 
 function copyToClipboard(text, label = 'Copied to clipboard') {
   if (!text) return;
-  navigator.clipboard.writeText(text)
-    .then(() => toast(label, 'ok', 1600))
-    .catch(() => toast('Copy failed', 'err'));
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text)
+      .then(() => toast(label, 'ok', 1600))
+      .catch(() => fallbackCopy(text, label));
+  } else {
+    fallbackCopy(text, label);
+  }
+}
+function fallbackCopy(text, label) {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast(label, 'ok', 1600);
+  } catch (e) {
+    toast('Copy failed', 'err');
+  }
 }
 
 function complement(seq) {
@@ -1104,10 +1377,7 @@ function complement(seq) {
                 W:'W', K:'M', M:'K', B:'V', V:'B', D:'H', H:'D' };
   return seq.split('').map(c => map[c] || 'N').join('');
 }
-
-function reverseComplement(seq) {
-  return complement(seq).split('').reverse().join('');
-}
+function reverseComplement(seq) { return complement(seq).split('').reverse().join(''); }
 
 function gcPercent(sub) {
   if (!sub.length) return 0;
@@ -1115,7 +1385,6 @@ function gcPercent(sub) {
   for (const c of sub) if (c === 'G' || c === 'C') gc++;
   return (gc / sub.length) * 100;
 }
-
 function translate(seq, frame = 0, stopAtStop = false) {
   let prot = '';
   for (let i = frame; i + 3 <= seq.length; i += 3) {
@@ -1125,7 +1394,6 @@ function translate(seq, frame = 0, stopAtStop = false) {
   }
   return prot;
 }
-
 function colorizeSeq(seq, max = 3000) {
   const slice = seq.length > max ? seq.slice(0, max) : seq;
   let out = '';
@@ -1135,7 +1403,6 @@ function colorizeSeq(seq, max = 3000) {
   }
   return out;
 }
-
 function sanitizeInput(text) {
   let raw = (text || '').trim();
   let name = 'Untitled sequence';
@@ -1146,7 +1413,6 @@ function sanitizeInput(text) {
     if (header) name = header;
     lines.shift();
   }
-
   let joined = lines.join('');
   joined = joined.toUpperCase().replace(/U/g, 'T');
   const stripped = joined.replace(/[^A-Z]/g, '');
@@ -1172,13 +1438,11 @@ function analyzeSequence(seq) {
     else if (c === 'C') counts.C++;
     else counts.amb++;
   }
-
   const length = seq.length;
   const gc = counts.G + counts.C;
   const at = counts.A + counts.T;
   const gcPct = length ? (gc / length) * 100 : 0;
   const atPct = length ? (at / length) * 100 : 0;
-
   const mw = counts.A * 313.21 + counts.T * 304.2 + counts.C * 289.18 + counts.G * 329.21 - 61.96;
 
   let tm;
@@ -1187,7 +1451,6 @@ function analyzeSequence(seq) {
   else tm = 64.9 + 41 * (gc - 16.4) / length;
 
   const tmSalt = length ? 81.5 + 16.6 * Math.log10(0.05) + 0.41 * gcPct - 675 / length : 0;
-
   const purines = counts.A + counts.G;
   const pyrimidines = counts.T + counts.C;
 
@@ -1240,7 +1503,8 @@ function drawGCPlot() {
   ctx.clearRect(0, 0, W, H);
 
   const seq = state.seq;
-  const pad = { l: 48, r: 18, t: 18, b: 30 };
+  const isMobile = W < 500;
+  const pad = { l: isMobile ? 36 : 48, r: isMobile ? 10 : 18, t: 16, b: 26 };
   const cw = W - pad.l - pad.r;
   const ch = H - pad.t - pad.b;
 
@@ -1262,7 +1526,7 @@ function drawGCPlot() {
 
   ctx.strokeStyle = 'rgba(255,255,255,.055)';
   ctx.lineWidth = 1;
-  ctx.font = '10px JetBrains Mono, monospace';
+  ctx.font = `${isMobile ? 9 : 10}px JetBrains Mono, monospace`;
   ctx.fillStyle = '#565e75';
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
@@ -1272,7 +1536,7 @@ function drawGCPlot() {
     ctx.moveTo(pad.l, y);
     ctx.lineTo(pad.l + cw, y);
     ctx.stroke();
-    ctx.fillText(g + '%', pad.l - 10, y);
+    ctx.fillText(g + '%', pad.l - 6, y);
   }
 
   const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + ch);
@@ -1296,7 +1560,7 @@ function drawGCPlot() {
   ctx.lineWidth = 2;
   ctx.lineJoin = 'round';
   ctx.shadowColor = 'rgba(6,182,212,.9)';
-  ctx.shadowBlur = 14;
+  ctx.shadowBlur = 12;
   ctx.stroke();
   ctx.shadowBlur = 0;
 
@@ -1313,17 +1577,17 @@ function drawGCPlot() {
   ctx.fillStyle = '#f9a8d4';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'bottom';
-  ctx.font = '600 10px Inter, sans-serif';
-  ctx.fillText('avg ' + avg.toFixed(1) + '%', pad.l + 6, Y(avg) - 5);
+  ctx.font = '600 ' + (isMobile ? 9 : 10) + 'px Inter, sans-serif';
+  ctx.fillText('avg ' + avg.toFixed(1) + '%', pad.l + 5, Y(avg) - 4);
 
   ctx.fillStyle = '#565e75';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
-  ctx.font = '10px JetBrains Mono, monospace';
-  const ticks = 6;
+  ctx.font = `${isMobile ? 9 : 10}px JetBrains Mono, monospace`;
+  const ticks = isMobile ? 3 : 6;
   for (let i = 0; i <= ticks; i++) {
     const pos = Math.round((seq.length / ticks) * i);
-    ctx.fillText(pos.toLocaleString(), X(pos), pad.t + ch + 10);
+    ctx.fillText(pos.toLocaleString(), X(pos), pad.t + ch + 8);
   }
 }
 
@@ -1401,7 +1665,7 @@ function renderComposition() {
   $('#codonWrap').innerHTML = `
     <table>
       <thead>
-        <tr><th>Codon</th><th>Amino Acid</th><th>Name</th><th style="text-align:right">Count</th><th style="text-align:right">Frequency</th></tr>
+        <tr><th>Codon</th><th>AA</th><th>Name</th><th style="text-align:right">Count</th><th style="text-align:right">Freq</th></tr>
       </thead>
       <tbody>
         ${sorted.map(([codon, count]) => {
@@ -1504,8 +1768,8 @@ function renderORFs() {
         <thead>
           <tr>
             <th>#</th><th>Strand</th><th>Frame</th><th style="text-align:right">Start</th>
-            <th style="text-align:right">End</th><th style="text-align:right">Length (nt)</th>
-            <th style="text-align:right">AA</th><th>Protein (preview)</th>
+            <th style="text-align:right">End</th><th style="text-align:right">nt</th>
+            <th style="text-align:right">AA</th><th>Protein</th>
           </tr>
         </thead>
         <tbody>
@@ -1518,7 +1782,7 @@ function renderORFs() {
               <td class="num">${o.end.toLocaleString()}</td>
               <td class="num">${o.length.toLocaleString()}</td>
               <td class="num">${o.protein.length}</td>
-              <td style="color:#7dd3fc">${o.protein.slice(0, 42)}${o.protein.length > 42 ? '…' : ''}</td>
+              <td style="color:#7dd3fc">${o.protein.slice(0, 32)}${o.protein.length > 32 ? '…' : ''}</td>
             </tr>`).join('')}
         </tbody>
       </table>
@@ -1549,7 +1813,7 @@ function renderEnzymes() {
 
   const map = $('#enzMap');
   if (!rows.length) {
-    map.innerHTML = `<div style="position:absolute;inset:0;display:grid;place-items:center;font-size:12.5px;color:var(--muted);font-weight:600">No restriction sites detected</div>`;
+    map.innerHTML = `<div style="position:absolute;inset:0;display:grid;place-items:center;font-size:12.5px;color:var(--muted);font-weight:600;text-align:center;padding:0 12px">No restriction sites detected</div>`;
   } else {
     let ticks = '';
     let count = 0;
@@ -1574,8 +1838,8 @@ function renderEnzymes() {
     <table>
       <thead>
         <tr>
-          <th>Enzyme</th><th>Recognition Site</th>
-          <th style="text-align:right">Cut Sites</th><th>Positions (1-based)</th>
+          <th>Enzyme</th><th>Site</th>
+          <th style="text-align:right">Cuts</th><th>Positions</th>
         </tr>
       </thead>
       <tbody>
@@ -1584,7 +1848,7 @@ function renderEnzymes() {
             <td style="color:#a5b4fc;font-weight:800">${r.name}</td>
             <td style="color:#6ee7b7;letter-spacing:1.5px">${r.site}</td>
             <td class="num">${r.positions.length}</td>
-            <td style="color:#94a3b8">${r.positions.slice(0, 30).join(', ')}${r.positions.length > 30 ? ` … +${r.positions.length - 30} more` : ''}</td>
+            <td style="color:#94a3b8">${r.positions.slice(0, 20).join(', ')}${r.positions.length > 20 ? ` … +${r.positions.length - 20}` : ''}</td>
           </tr>`).join('')}
       </tbody>
     </table>`;
@@ -1630,7 +1894,6 @@ function searchMotif() {
     hits.push({ strand: '+', pos: m.index + 1, match: m[0] });
     if (m.index === regex.lastIndex) regex.lastIndex++;
   }
-
   regex.lastIndex = 0;
   while ((m = regex.exec(rc)) !== null) {
     hits.push({ strand: '−', pos: seq.length - m.index - m[0].length + 1, match: m[0] });
@@ -1652,8 +1915,8 @@ function searchMotif() {
     return `
       <div class="motif-hit">
         <span class="pos">#${h.pos.toLocaleString()}</span>
-        <span class="tag ${h.strand === '+' ? 'plus' : 'minus'}">${h.strand} strand</span>
-        <span style="margin-left:10px">
+        <span class="tag ${h.strand === '+' ? 'plus' : 'minus'}">${h.strand}</span>
+        <span style="margin-left:8px">
           <span class="dim">${before}</span><mark>${h.match}</mark><span class="dim">${after}</span>
         </span>
       </div>`;
@@ -1713,7 +1976,6 @@ function runAnalysis() {
     toast('No valid nucleotide characters were found in your input.', 'err');
     return;
   }
-
   if (invalid.length) {
     toast(`Ignored ${invalid.length} invalid character type(s): ${invalid.slice(0, 8).join(', ')}`, 'err', 4200);
   }
@@ -1733,6 +1995,7 @@ function runAnalysis() {
   $('#results').classList.remove('hidden');
   $('#downloadBtn').disabled = false;
   $('#downloadBtn').style.display = '';
+  $('#drawerDownloadBtn').disabled = false;
 
   requestAnimationFrame(() => {
     drawGCPlot();
@@ -1776,6 +2039,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const ta = $('#seqInput');
 
+  /* ---------- DRAWER / HAMBURGER ---------- */
+  const hamburger = $('#hamburgerBtn');
+  const drawer = $('#drawer');
+  const backdrop = $('#drawerBackdrop');
+  const drawerClose = $('#drawerClose');
+  const drawerLinks = $$('[data-drawer-link]');
+
+  const openDrawer = () => {
+    drawer.classList.add('open');
+    backdrop.classList.add('open');
+    hamburger.classList.add('active');
+    hamburger.setAttribute('aria-expanded', 'true');
+    drawer.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('no-scroll');
+  };
+  const closeDrawer = () => {
+    drawer.classList.remove('open');
+    backdrop.classList.remove('open');
+    hamburger.classList.remove('active');
+    hamburger.setAttribute('aria-expanded', 'false');
+    drawer.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('no-scroll');
+  };
+
+  hamburger.addEventListener('click', () => {
+    drawer.classList.contains('open') ? closeDrawer() : openDrawer();
+  });
+  drawerClose.addEventListener('click', closeDrawer);
+  backdrop.addEventListener('click', closeDrawer);
+
+  // Close drawer when a link inside is clicked
+  drawerLinks.forEach(a => a.addEventListener('click', closeDrawer));
+
+  // Close drawer on Escape key
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer();
+  });
+
+  // Close drawer if viewport grows back to desktop
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 860 && drawer.classList.contains('open')) closeDrawer();
+  });
+
+  /* ---------- LIVE INPUT ---------- */
   const updateLive = () => {
     const { seq, invalid } = sanitizeInput(ta.value);
     const lenEl = $('#charCount');
@@ -1801,7 +2108,6 @@ document.addEventListener('DOMContentLoaded', () => {
   ta.addEventListener('input', updateLive);
 
   $('#analyzeBtn').addEventListener('click', runAnalysis);
-
   ta.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') runAnalysis();
   });
@@ -1812,6 +2118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $('#results').classList.add('hidden');
     $('#downloadBtn').disabled = true;
     $('#downloadBtn').style.display = 'none';
+    $('#drawerDownloadBtn').disabled = true;
     state.seq = '';
     state.analysis = null;
     toast('Input cleared.', 'info', 1500);
@@ -1832,7 +2139,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Hero: load demo
   const loadDemo = $('#loadDemoBtn');
   if (loadDemo) {
     loadDemo.addEventListener('click', () => {
@@ -1896,8 +2202,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  $('#downloadBtn').addEventListener('click', () => {
-    if (!state.analysis) return;
+  /* ---------- DOWNLOAD REPORT ---------- */
+  function buildReport() {
+    if (!state.analysis) return null;
     const a = state.analysis;
     const L = [];
     L.push('═══════════════════════════════════════════════════════');
@@ -1944,8 +2251,13 @@ document.addEventListener('DOMContentLoaded', () => {
     L.push($('#rcOut').textContent);
     L.push('');
     L.push('═══════════════════════════════════════════════════════');
+    return L.join('\n');
+  }
 
-    const blob = new Blob([L.join('\n')], { type: 'text/plain;charset=utf-8' });
+  function downloadReport() {
+    const text = buildReport();
+    if (!text) return;
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const aEl = document.createElement('a');
     aEl.href = url;
@@ -1955,8 +2267,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.removeChild(aEl);
     URL.revokeObjectURL(url);
     toast('Report downloaded.', 'ok');
-  });
+    closeDrawer();
+  }
 
+  $('#downloadBtn').addEventListener('click', downloadReport);
+  $('#drawerDownloadBtn').addEventListener('click', downloadReport);
+
+  /* ---------- RESIZE REDRAW ---------- */
   let resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
@@ -1965,6 +2282,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 140);
   });
 
+  /* ---------- INIT ---------- */
   updateLive();
   $('#motifResults').innerHTML = `<div class="empty">Enter a motif or IUPAC pattern above to begin searching.</div>`;
   $('#orfResult').innerHTML = `<div class="empty">Load a sequence to begin ORF detection.</div>`;
@@ -1972,3 +2290,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
